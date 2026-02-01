@@ -1,0 +1,62 @@
+.announcements-page {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px;
+}
+
+.department-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+  padding: 0 var(--spacing-lg);
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--border-color);
+  background-color: white;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background-color: var(--bg-tertiary);
+}
+
+.filter-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .announcements-page {
+    padding: 20px 16px;
+  }
+
+  .department-filters {
+    padding: 0;
+  }
+
+  .announcements-list {
+    padding: 0;
+  }
+}
