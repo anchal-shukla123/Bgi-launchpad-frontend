@@ -1,113 +1,204 @@
+// import React, { useState, useEffect } from 'react';
+// import { useAuth } from '../context/AuthContext';
+// import { useLostFound, useCreateLostFound } from '../hooks/useApi';
+// import apiService from '../api/apiService';
+// import LostFoundCard from '../components/LostFoundCard';
+// import ReportItemModal from '../components/ReportItemModal';
+// import LoadingSpinner from '../components/LoadingSpinner';
+// import ErrorMessage from '../components/ErrorMessage';
+// import '../styles/LostAndFound.css'
+
+// const LostAndFound = () => {
+//   const { user } = useAuth();
+//   const [typeFilter, setTypeFilter] = useState('All');
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const [showModal, setShowModal] = useState(false);
+//   const [page, setPage] = useState(0);
+//   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+//   const { data: itemsData, loading, error, refetch } = useLostFound({ page, size: 20 });
+
+//   useEffect(() => {
+//     refetch();
+//   }, [typeFilter, page, refreshTrigger]);
+
+//   const handleClaim = async (id) => {
+//     if (window.confirm('Mark this item as claimed?')) {
+//       try {
+//         await apiService.markAsClaimed(id);
+//         setRefreshTrigger(prev => prev + 1);
+//       } catch (err) {
+//         alert('Failed to claim: ' + err.message);
+//       }
+//     }
+//   };
+
+//   const filteredItems = itemsData?.content?.filter(item => {
+//     const matchesType = typeFilter === 'All' || item.status === typeFilter.toUpperCase();
+//     const matchesSearch = !searchTerm || 
+//       item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       item.description.toLowerCase().includes(searchTerm.toLowerCase());
+//     return matchesType && matchesSearch;
+//   }) || [];
+
+//   return (
+//     <div className="lost-found-page">
+//       <div className="page-header">
+//         <h1>Lost & Found</h1>
+//         <button className="btn-primary" onClick={() => setShowModal(true)}>
+//           + Report Item
+//         </button>
+//       </div>
+
+//       <div className="search-filters">
+//         <input
+//           type="text"
+//           placeholder="Search items..."
+//           value={searchTerm}
+//           onChange={(e) => setSearchTerm(e.target.value)}
+//           className="search-input"
+//         />
+        
+//         <div className="type-filters">
+//           {['All', 'Lost', 'Found', 'Claimed'].map(type => (
+//             <button
+//               key={type}
+//               className={typeFilter === type ? 'active' : ''}
+//               onClick={() => setTypeFilter(type)}
+//             >
+//               {type}
+//             </button>
+//           ))}
+//         </div>
+//       </div>
+
+//       {loading && <LoadingSpinner />}
+//       {error && <ErrorMessage message={error.message} onRetry={refetch} />}
+
+//       {!loading && !error && (
+//         <div className="items-grid">
+//           {filteredItems.length > 0 ? (
+//             filteredItems.map(item => (
+//               <LostFoundCard
+//                 key={item.id}
+//                 item={item}
+//                 onClaim={handleClaim}
+//                 canClaim={user && item.userId !== user.id}
+//               />
+//             ))
+//           ) : (
+//             <div className="empty-state">No items found</div>
+//           )}
+//         </div>
+//       )}
+
+//       {showModal && (
+//         <ReportItemModal
+//           onClose={() => setShowModal(false)}
+//           onSuccess={() => {
+//             setShowModal(false);
+//             setRefreshTrigger(prev => prev + 1);
+//           }}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default LostAndFound;
+
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useLostFound } from '../hooks/useApi';
+import apiService from '../api/apiService';
 import LostFoundCard from '../components/LostFoundCard';
 import ReportItemModal from '../components/ReportItemModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
 import '../styles/LostAndFound.css';
+import '../styles/SharedStyles.css';
 
 const LostAndFound = () => {
-  const [selectedFilter, setSelectedFilter] = useState('All');
+  const { user } = useAuth();
+  const [typeFilter, setTypeFilter] = useState('All');
   const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(0);
 
-  const items = [
-    {
-      id: 1,
-      type: 'Lost',
-      title: 'Black Wallet',
-      description: 'Black leather wallet with student ID and some cash. Lost near library.',
-      category: 'Personal Items',
-      location: 'Central Library',
-      timeAgo: '2 hours ago',
-      expiresIn: '28 days',
-      postedBy: 'Rahul Sharma',
-      color: '#FF6B6B'
-    },
-    {
-      id: 2,
-      type: 'Found',
-      title: 'Blue Water Bottle',
-      description: 'Milton brand blue water bottle found in CS Lab.',
-      category: 'Personal Items',
-      location: 'CS Lab 2',
-      timeAgo: '5 hours ago',
-      expiresIn: '29 days',
-      postedBy: 'Priya Singh',
-      color: '#4ECDC4'
-    },
-    {
-      id: 3,
-      type: 'Lost',
-      title: 'Samsung Galaxy Earbuds',
-      description: 'White Samsung Galaxy Buds with charging case. Lost in cafeteria area.',
-      category: 'Electronics',
-      location: 'Cafeteria',
-      timeAgo: '1 day ago',
-      expiresIn: '27 days',
-      postedBy: 'Amit Kumar',
-      color: '#FF6B6B'
-    },
-    {
-      id: 4,
-      type: 'Found',
-      title: 'Engineering Textbook',
-      description: 'Mechanical Engineering textbook found in Lecture Hall 3.',
-      category: 'Books',
-      location: 'Lecture Hall 3',
-      timeAgo: '2 days ago',
-      expiresIn: '26 days',
-      postedBy: 'Neha Patel',
-      color: '#4ECDC4'
+  const { data: itemsData, loading, error, refetch } = useLostFound({ page, size: 20 });
+
+  const handleClaim = async (id) => {
+    if (window.confirm('Mark this item as claimed?')) {
+      try {
+        await apiService.markAsClaimed(id);
+        refetch();
+        alert('Item marked as claimed!');
+      } catch (err) {
+        alert('Failed to claim: ' + err.message);
+      }
     }
-  ];
+  };
 
-  const filters = ['All', 'Lost', 'Found'];
+  const handleSuccess = () => {
+    setShowModal(false);
+    refetch(); 
+  };
 
-  const filteredItems = selectedFilter === 'All' 
-    ? items 
-    : items.filter(item => item.type === selectedFilter);
+  const filteredItems = itemsData?.content?.filter(item => {
+    const matchesType = typeFilter === 'All' || item.status === typeFilter.toUpperCase();
+    return matchesType;
+  }) || [];
 
   return (
     <div className="lost-found-page">
       <div className="page-header">
         <div className="header-content">
-          <h1>Lost & Found</h1>
-          <p className="subtitle">Help reunite items with their owners</p>
+        <h1>Lost & Found</h1>
+        <p className="subtitle">Help reunite items with their owners</p>
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
-          </svg>
-          Report Item
+          + Report Item
         </button>
       </div>
 
-      <div className="search-filter-bar">
-        <div className="search-box">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/>
-          </svg>
-          <input type="text" placeholder="Search items..." />
-        </div>
-
-        <div className="filter-buttons">
-          {filters.map(filter => (
-            <button
-              key={filter}
-              className={selectedFilter === filter ? 'filter-btn active' : 'filter-btn'}
-              onClick={() => setSelectedFilter(filter)}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="items-grid">
-        {filteredItems.map(item => (
-          <LostFoundCard key={item.id} item={item} />
+      <div className="type-filters">
+        {['All', 'Lost', 'Found', 'Claimed'].map(type => (
+          <button
+            key={type}
+            className={typeFilter === type ? 'filter-btn active' : 'filter-btn'}
+            onClick={() => setTypeFilter(type)}
+          >
+            {type}
+          </button>
         ))}
       </div>
 
+      {loading && <LoadingSpinner />}
+      {error && <ErrorMessage message={error.message} onRetry={refetch} />}
+
+      {!loading && !error && (
+        <div className="items-grid">
+          {filteredItems.length > 0 ? (
+            filteredItems.map(item => (
+              <LostFoundCard
+                key={item.id}
+                item={item}
+                onClaim={handleClaim}
+                canClaim={user && item.userId !== user.id}
+              />
+            ))
+          ) : (
+            <div className="empty-state">
+              <p>No items found</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {showModal && (
-        <ReportItemModal onClose={() => setShowModal(false)} />
+        <ReportItemModal
+          onClose={() => setShowModal(false)}
+          onSuccess={handleSuccess}
+        />
       )}
     </div>
   );

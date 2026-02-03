@@ -82,6 +82,21 @@
   color: var(--text-primary);
 }
 
+.btn-logout{
+  padding: 8px 12px;
+  background-color: #e43e3e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+}
 .navbar-links {
   max-width: 1400px;
   margin: 0 auto;

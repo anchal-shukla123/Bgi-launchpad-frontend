@@ -1,60 +1,63 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useAnnouncements, useAnnouncementsByDepartment } from '../hooks/useApi';
+import apiService from '../api/apiService';
 import AnnouncementCard from '../components/AnnouncementCard';
 import CreateAnnouncementModal from '../components/CreateAnnouncementModal';
+import LoadingSpinner from '../components/LoadingSpinner';
+import ErrorMessage from '../components/ErrorMessage';
 import '../styles/Announcements.css';
 
-const Announcements = ({ userRole }) => {
+const Announcements = () => {
+  const { isHOD } = useAuth();
   const [selectedDept, setSelectedDept] = useState('All Departments');
   const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(0);
 
-  const announcements = [
-    {
-      id: 1,
-      department: 'Computer Science',
-      time: '2 hours ago',
-      title: 'Hackathon Registration Open',
-      content: 'Annual inter-college hackathon registration is now open. Team size: 3-4 members. Prize pool: ₹50,000. Last date: Dec 20, 2025.',
-      author: 'Dr. Sharma (CS HOD)',
-      views: 234,
-      comments: 2,
-      poll: {
-        question: 'Preferred hackathon theme?',
-        options: [
-          { text: 'AI/ML', votes: 45 },
-          { text: 'Web Development', votes: 32 },
-          { text: 'Mobile Apps', votes: 28 },
-          { text: 'IoT', votes: 15 }
-        ],
-        totalVotes: 120
-      }
-    },
-    {
-      id: 2,
-      department: 'Mechanical',
-      time: '5 hours ago',
-      title: 'Workshop on CAD Design - Dec 15',
-      content: 'Two-day workshop on advanced CAD design techniques. Industry experts from Tata Motors. Limited seats available.',
-      author: 'Prof. Verma (Mech HOD)',
-      views: 189,
-      comments: 0
-    },
-    {
-      id: 3,
-      department: 'All Departments',
-      time: '1 day ago',
-      title: 'Winter Break Schedule',
-      content: 'Winter break starts from Dec 23rd. Campus will reopen on Jan 6th. All students must vacate hostels by Dec 22nd evening.',
-      author: 'Administration',
-      views: 567,
-      comments: 1
-    }
-  ];
+  // Fetch announcements based on selected department
+  const { 
+    data: announcementsData, 
+    loading, 
+    error, 
+    refetch 
+  } = selectedDept === 'All Departments'
+    ? useAnnouncements({ page, size: 20 })
+    : useAnnouncementsByDepartment(getDepartmentId(selectedDept), { page, size: 20 });
 
   const departments = ['All Departments', 'Computer Science', 'Mechanical', 'Electrical', 'Civil'];
 
-  const filteredAnnouncements = selectedDept === 'All Departments' 
-    ? announcements 
-    : announcements.filter(a => a.department === selectedDept || a.department === 'All Departments');
+  const handleCreateSuccess = () => {
+    setShowModal(false);
+    refetch(); // Manual refetch
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this announcement?')) {
+      try {
+        await apiService.deleteAnnouncement(id);
+        refetch(); // Manual refetch
+      } catch (err) {
+        alert('Failed to delete announcement: ' + err.message);
+      }
+    }
+  };
+
+  const handleNextPage = () => {
+    if (announcementsData && !announcementsData.last) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page > 0) {
+      setPage(prev => prev - 1);
+    }
+  };
+
+  const handleDepartmentChange = (dept) => {
+    setSelectedDept(dept);
+    setPage(0); // Reset to first page
+  };
 
   return (
     <div className="announcements-page">
@@ -63,7 +66,7 @@ const Announcements = ({ userRole }) => {
           <h1>Announcements & Feedback</h1>
           <p className="subtitle">Stay updated with campus news</p>
         </div>
-        {userRole === 'HOD' && (
+        {isHOD() && (
           <button className="btn-primary" onClick={() => setShowModal(true)}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
@@ -78,24 +81,84 @@ const Announcements = ({ userRole }) => {
           <button
             key={dept}
             className={selectedDept === dept ? 'filter-btn active' : 'filter-btn'}
-            onClick={() => setSelectedDept(dept)}
+            onClick={() => handleDepartmentChange(dept)}
           >
             {dept}
           </button>
         ))}
       </div>
 
-      <div className="announcements-list">
-        {filteredAnnouncements.map(announcement => (
-          <AnnouncementCard key={announcement.id} announcement={announcement} />
-        ))}
-      </div>
+      {loading && <LoadingSpinner />}
+
+      {error && (
+        <ErrorMessage 
+          message={error.message || 'Failed to load announcements'} 
+          onRetry={refetch}
+        />
+      )}
+
+      {!loading && !error && announcementsData && (
+        <>
+          <div className="announcements-list">
+            {announcementsData.content && announcementsData.content.length > 0 ? (
+              announcementsData.content.map(announcement => (
+                <AnnouncementCard 
+                  key={announcement.id} 
+                  announcement={announcement}
+                  onDelete={isHOD() ? handleDelete : null}
+                />
+              ))
+            ) : (
+              <div className="empty-state">
+                <p>No announcements found</p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {announcementsData.content && announcementsData.content.length > 0 && (
+            <div className="pagination">
+              <button 
+                onClick={handlePrevPage} 
+                disabled={page === 0}
+                className="btn-secondary"
+              >
+                Previous
+              </button>
+              <span className="page-info">
+                Page {page + 1} of {announcementsData.totalPages || 1}
+              </span>
+              <button 
+                onClick={handleNextPage} 
+                disabled={announcementsData.last}
+                className="btn-secondary"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
 
       {showModal && (
-        <CreateAnnouncementModal onClose={() => setShowModal(false)} />
+        <CreateAnnouncementModal 
+          onClose={() => setShowModal(false)}
+          onSuccess={handleCreateSuccess}
+        />
       )}
     </div>
   );
 };
+
+// Helper function to map department names to IDs
+function getDepartmentId(deptName) {
+  const deptMap = {
+    'Computer Science': 1,
+    'Mechanical': 2,
+    'Electrical': 3,
+    'Civil': 4,
+  };
+  return deptMap[deptName] || null;
+}
 
 export default Announcements;

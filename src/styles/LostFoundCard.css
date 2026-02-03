@@ -1,31 +1,85 @@
+
 .lost-found-card {
-  background-color: white;
-  border-radius: var(--radius-lg);
+  background: white;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .lost-found-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 }
 
-.card-image {
-  width: 100%;
-  height: 160px;
+/* Header with gradient background and 3D box icon */
+.card-header-section {
+  height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFA06B 100%);
 }
 
-.card-content {
-  padding: 20px;
+.card-header-section.lost {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FFA06B 100%);
 }
 
-.card-header {
+.card-header-section.found {
+  background: linear-gradient(135deg, #00D9A3 0%, #00E5B8 100%);
+}
+
+.card-header-section.claimed {
+  background: linear-gradient(135deg, #A0AEC0 0%, #CBD5E0 100%);
+}
+
+/* 3D Box Icon */
+.box-icon {
+  width: 80px;
+  height: 80px;
+  background: #F7936F;
+  border-radius: 12px;
+  position: relative;
+  transform: rotate(45deg);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.box-icon::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #E67E5F;
+  top: -10px;
+  left: 10px;
+  border-radius: 12px;
+}
+
+.box-icon::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #D96F50;
+  top: 20px;
+  left: 20px;
+  border-radius: 4px;
+}
+
+/* Card Body */
+.card-body-section {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title and Status Badge Row */
+.title-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -34,123 +88,147 @@
 }
 
 .item-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.3;
+  color: #1A202C;
+  margin: 0;
   flex: 1;
+  line-height: 1.3;
 }
 
-.type-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.type-badge.lost {
-  background-color: #FEE2E2;
-  color: #991B1B;
-}
-
-.type-badge.found {
-  background-color: #D1FAE5;
-  color: #065F46;
-}
-
-.item-description {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 16px;
-}
-
-.item-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* Status Badge */
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.meta-item svg {
-  width: 14px;
-  height: 14px;
-  color: var(--text-tertiary);
+  font-weight: 600;
   flex-shrink: 0;
 }
 
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+.status-badge.lost {
+  background-color: #FED7D7;
+  color: #C53030;
 }
 
+.status-badge.found {
+  background-color: #C6F6D5;
+  color: #22543D;
+}
+
+.status-badge.claimed {
+  background-color: #E2E8F0;
+  color: #4A5568;
+}
+
+/* Description */
+.item-description {
+  color: #4A5568;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Details List */
+.item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #4A5568;
+}
+
+.detail-item svg {
+  width: 16px;
+  height: 16px;
+  color: #718096;
+  flex-shrink: 0;
+}
+
+.detail-item strong {
+  color: #2D3748;
+}
+
+/* Posted By */
 .posted-by {
-  font-size: 13px;
-  color: var(--text-tertiary);
+  color: #718096;
+  font-size: 14px;
+  margin-bottom: 16px;
 }
 
-.btn-contact {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  background-color: var(--primary-color);
+/* Contact Button */
+.contact-button {
+  width: 100%;
+  padding: 14px 24px;
+  background: #3182CE;
   color: white;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
 }
 
-.btn-contact:hover {
-  background-color: #3451CC;
-  transform: translateY(-1px);
+.contact-button:hover {
+  background: #2C5AA0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.4);
 }
 
-.btn-contact svg {
-  width: 16px;
-  height: 16px;
+.contact-button:active {
+  transform: translateY(0);
 }
 
+.contact-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Claimed Button (disabled state) */
+.contact-button.claimed {
+  background: #E2E8F0;
+  color: #718096;
+  cursor: not-allowed;
+}
+
+.contact-button.claimed:hover {
+  background: #E2E8F0;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Grid Layout for Cards */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+  padding: 0 24px 24px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .card-image {
-    height: 140px;
+  .items-grid {
+    grid-template-columns: 1fr;
+    padding: 0 16px 16px;
   }
-
-  .card-content {
-    padding: 16px;
+  
+  .card-body-section {
+    padding: 20px;
   }
-
+  
   .item-title {
-    font-size: 16px;
-  }
-
-  .item-description {
-    font-size: 13px;
-  }
-
-  .card-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .btn-contact {
-    width: 100%;
-    justify-content: center;
+    font-size: 18px;
   }
 }

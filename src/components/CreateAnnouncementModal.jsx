@@ -1,19 +1,63 @@
 import React, { useState } from 'react';
+import { useCreateAnnouncement } from '../hooks/useApi';
 import '../styles/Modal.css';
 
-const CreateAnnouncementModal = ({ onClose }) => {
+const CreateAnnouncementModal = ({ onClose, onSuccess }) => {
+  const { createAnnouncement, loading } = useCreateAnnouncement();
+  
   const [formData, setFormData] = useState({
-    department: 'Computer Science',
+    departmentId: 1, // Default to Computer Science
     title: '',
-    content: '',
-    includePoll: false
+    description: '',
+    hasPoll: false
   });
 
-  const handleSubmit = (e) => {
+  const [error, setError] = useState('');
+
+  const departmentMap = {
+    'Computer Science': 1,
+    'Mechanical': 2,
+    'Electrical': 3,
+    'Civil': 4,
+    'All Departments': null
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
-    onClose();
+    setError('');
+
+    // Validation
+    if (!formData.title || !formData.description) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    // Get user from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Prepare data for backend
+    const announcementData = {
+      title: formData.title,
+      description: formData.description,
+      departmentId: formData.departmentId,
+      userId: user.id || 1,
+      hasPoll: formData.hasPoll,
+      viewCount: 0,
+      commentCount: 0
+    };
+
+    console.log('Creating announcement:', announcementData);
+
+    const result = await createAnnouncement(announcementData);
+    
+    if (result.success) {
+      console.log('Announcement created successfully!', result.data);
+      alert('Announcement published successfully!');
+      onSuccess(); // This will refresh the announcements list
+    } else {
+      console.error('Failed to create announcement:', result.error);
+      setError(result.error?.message || 'Failed to create announcement. Please try again.');
+    }
   };
 
   return (
@@ -22,11 +66,18 @@ const CreateAnnouncementModal = ({ onClose }) => {
         <h2 className="modal-title">Create New Announcement</h2>
         
         <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="error-alert" style={{marginBottom: '16px', padding: '12px', backgroundColor: '#FEE2E2', color: '#DC2626', borderRadius: '8px'}}>
+              {error}
+            </div>
+          )}
+
           <div className="form-group">
-            <label>Department</label>
+            <label>Department *</label>
             <select 
-              value={formData.department}
-              onChange={(e) => setFormData({...formData, department: e.target.value})}
+              value={Object.keys(departmentMap).find(key => departmentMap[key] === formData.departmentId)}
+              onChange={(e) => setFormData({...formData, departmentId: departmentMap[e.target.value]})}
+              disabled={loading}
             >
               <option>Computer Science</option>
               <option>Mechanical</option>
@@ -37,24 +88,26 @@ const CreateAnnouncementModal = ({ onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Title</label>
+            <label>Title *</label>
             <input 
               type="text"
               placeholder="Announcement title"
               value={formData.title}
               onChange={(e) => setFormData({...formData, title: e.target.value})}
               required
+              disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label>Content</label>
+            <label>Content *</label>
             <textarea 
               placeholder="Write your announcement..."
-              value={formData.content}
-              onChange={(e) => setFormData({...formData, content: e.target.value})}
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
               rows="6"
               required
+              disabled={loading}
             />
           </div>
 
@@ -62,19 +115,29 @@ const CreateAnnouncementModal = ({ onClose }) => {
             <label>
               <input 
                 type="checkbox"
-                checked={formData.includePoll}
-                onChange={(e) => setFormData({...formData, includePoll: e.target.checked})}
+                checked={formData.hasPoll}
+                onChange={(e) => setFormData({...formData, hasPoll: e.target.checked})}
+                disabled={loading}
               />
               Include a poll
             </label>
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>
+            <button 
+              type="button" 
+              className="btn-secondary" 
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
-              Publish
+            <button 
+              type="submit" 
+              className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? 'Publishing...' : 'Publish'}
             </button>
           </div>
         </form>
