@@ -1,7 +1,7 @@
 // API Service - Complete implementation for BGI Launchpad
 // src/api/apiService.js
 
-const API_BASE_URL ='https://bgi-launchpad-backend-1dnk.onrender.com/';
+const API_BASE_URL ='https://bgi-launchpad-backend-1dnk.onrender.com';
 
 console.log('🚀 API Base URL:', API_BASE_URL);
 
