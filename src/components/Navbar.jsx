@@ -22,10 +22,16 @@ const Navbar = () => {
       <div className="navbar-container">
         <div className="navbar-brand">
           <div className="logo">
-            <img src={logo} alt="Logo" width={40} height={40} />
+            {/* <img src={logo} alt="Logo" width={40} height={40} /> */}
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <rect width="40" height="40" rx="10" fill="#4361EE"/>
+              <circle cx="20" cy="20" r="8" fill="#FF006E"/>
+              <circle cx="20" cy="20" r="4" fill="white"/>
+            </svg>
           </div>
           <div className="brand-text">
-            <h1>BGI Launchpad</h1>
+            {/* <h1>BGI Launchpad</h1> */}
+            <h1>College Platform</h1>
             <p>Campus Hub & Community</p>
           </div>
         </div>

@@ -102,7 +102,7 @@ const Register = () => {
         <div className="login-card">
           <div className="login-header">
             <div className="logo">
-              <img src={logo} alt="Logo" width={48} height={48} />
+              {/* <img src={logo} alt="Logo" width={48} height={48} /> */}
             </div>
             <h1>Create Account</h1>
             <p className="subtitle">Join the BGI Launchpad Community</p>

@@ -68,9 +68,9 @@ const Login = () => {
           {/* Header */}
           <div className="login-header">
             <div className="logo">
-              <img src={logo} alt="Logo" width={48} height={48} />
+              {/* <img src={logo} alt="Logo" width={48} height={48} /> */}
             </div>
-            <h1>BGI Launchpad</h1>
+            <h1>College Platform</h1>
             <p className="subtitle">Campus Hub & Community Platform</p>
           </div>
 
