@@ -3,7 +3,7 @@
 
 const API_BASE_URL = import.meta.env?.VITE_API_URL || 
                      process.env.REACT_APP_API_URL || 
-                     'http://localhost:8080/api';
+                     'https://bgi-launchpad-backend-1dnk.onrender.com/';
 
 console.log('🚀 API Base URL:', API_BASE_URL);
 
@@ -89,7 +89,7 @@ class ApiService {
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         throw {
           status: 0,
-          message: 'Cannot connect to server. Make sure backend is running on http://localhost:8080',
+          message: 'Cannot connect to server. Make sure backend is running on https://bgi-launchpad-backend-1dnk.onrender.com/',
         };
       }
       
